@@ -27,6 +27,7 @@ def check_ext(fname, ext='.nii.gz'):
         fname = fname[:-7]
     return f'{fname}{ext}'
 
+
 def load_nifti_get_mask(fname, dim=4):
     """
     Load a nifti file and returns its data, its image, and a 3d mask.
@@ -136,6 +137,39 @@ def variance_weighted_average(fname,
     else:
         exname = f'wavg_{exname}'
     export_nifti(wavg.astype(float), img, exname)
+
+
+def variance_weighted_average_volume(data, n_subs=len(SUB_LIST)):
+    """
+    Compute the variance weighted average of a multi-session study in a volume.
+
+    It's supposed that:
+    - data is a 4D volume in which the 4th D is sub 1 ses 1, sub 1 ses 2, ..., sub n ses m
+    - OR, data is a 5D volume in which the 4th D is sessions and the 5th D is subjects.
+    - The number of sessions is always the same across subjects.
+
+    Might return slightly different results from function above because mask.
+    """
+    subs = np.split(data, n_subs, axis=-1)
+    sub_avg = np.empty([data.shape[0], data.shape[1], data.shape[2], n_subs])
+    sub_var = np.empty([data.shape[0], data.shape[1], data.shape[2], n_subs])
+    # Load niftis of all subjects
+    for n, sub in enumerate(subs):
+        # Compute average & variance of voxels
+        sub_avg[:, :, :, n] = sub.mean(axis=3)
+        sub_var[:, :, :, n] = ((sub - sub_avg[:, :, :, n])**2).mean(axis=3)
+
+    # Invert variance & set infinites to zero (if any)
+    invvar = 1 / sub_var
+    invvar[np.isinf(invvar)] = 0
+
+    # Mask group average using invvar
+    group = np.ma.array(sub_avg, mask=[invvar == 0])
+
+    # Finally, compute variance weighted average & fill masked entries with 0
+    wavg = np.ma.average(group, weights=invvar, axis=3).filled(0)
+
+    return wavg
 
 
 def compute_metric(data, atlas, mask, metric='avg', invert=False):
