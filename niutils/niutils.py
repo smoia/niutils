@@ -157,7 +157,7 @@ def variance_weighted_average_volume(data, n_subs=len(SUB_LIST)):
     for n, sub in enumerate(subs):
         # Compute average & variance of voxels
         sub_avg[:, :, :, n] = sub.mean(axis=3)
-        sub_var[:, :, :, n] = ((sub - sub_avg[:, :, :, n])**2).mean(axis=3)
+        sub_var[:, :, :, n] = ((sub - sub_avg[:, :, :, n, np.newaxis])**2).mean(axis=3)
 
     # Invert variance & set infinites to zero (if any)
     invvar = 1 / sub_var
