@@ -1,3 +1,15 @@
+# 0.3.0 (Sat Oct 09 2021)
+
+#### 🚀 Enhancement
+
+- More fixes [#3](https://github.com/smoia/niutils/pull/3) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.2.1 (Sat Oct 09 2021)
 
 #### 🐛 Bug Fix
