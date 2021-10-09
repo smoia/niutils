@@ -5,6 +5,8 @@ import os
 import nibabel as nib
 import numpy as np
 
+from copy import deepcopy
+
 SUB_LIST = ['001', '002', '003', '004', '007', '008', '009']
 LAST_SES = 10  # 10
 
@@ -24,7 +26,7 @@ def check_ext(fname, ext='.nii.gz'):
     Check the extension of input. It's possible to add it.
     """
     if fname.endswith(ext):
-        fname = fname[:-7]
+        fname = fname[:-len(ext)]
     return f'{fname}{ext}'
 
 
@@ -60,13 +62,96 @@ def compute_rank(data, islast=True):
     return rank/(data.shape[-1]-1)*100
 
 
-def export_nifti(data, img, fname):
+def export_nifti(data, img, fname, overwrite=True):
     """
     Export a nifti file.
     """
-    out_img = nib.Nifti1Image(data, img.affine, img.header)
+
+    tmp_dim = np.ones(img.header['dim'].shape, dtype=np.int16)
+    tmp_dim[0] = len(data.shape)
+    tmp_dim[1:len(data.shape)+1] = data.shape
+
+    tmp_header = deepcopy(img.header)
+
+    if (tmp_dim != img.header['dim']).any():
+        if not overwrite:
+            print(f'!!! Warning: exporting data with shape {data.shape} with '
+                  f'a header declaring dimensions: {img.header["dim"]}. ')
+        else:
+            print('!!! Warning: data shape and header do not match. '
+                  'Overwriting header dim and pixdim')
+            tmp_pixdim = tmp_header['pixdim']
+            tmp_pixdim[len(data.shape)+1:img.header['dim'][0]+1] = 1
+            tmp_header['dim'] = tmp_dim
+            # tmp_header['pixdim'] = tmp_pixdim  # This line is not necessary!
+
+    out_img = nib.Nifti1Image(data, img.affine, tmp_header)
     out_img.to_filename(check_ext(fname))
 
+
+def vol_to_mat(data):
+    """
+    Reshape nD into 2D
+    """
+    return data.reshape(((-1,) + data.shape[3:]), order='F')
+
+
+def mat_to_vol(data, shape=None, asdata=None):
+    """
+    Reshape 2D into nD using either shape or data shape)
+    """
+    if asdata is not None:
+        if shape is not None:
+            print('Both shape and asdata were defined. '
+                  f'Overwriting shape {shape} with asdata {asdata.shape}')
+        shape = asdata.shape
+    elif shape == '':
+        raise ValueError('Both shape and asdata are empty. '
+                         'Must specify at least one')
+
+    return data.reshape(shape, order='F')
+
+
+def apply_mask(data, mask):
+    """
+    Reduce shape and size of data based on mask
+    """
+    if data.shape[:len(mask.shape)] != mask.shape:
+        raise ValueError(f'Cannot mask data with shape {data.shape} using mask '
+                         f'with shape {mask.shape}')
+    if (len(data.shape)-len(mask.shape)) > 1:
+        print('Warning: returning volume with '
+              f'{len(data.shape)-len(mask.shape)+1} dimensions.')
+    else:
+        print(f'Returning {len(data.shape)-len(mask.shape)+1}D array.')
+
+    return data[mask != 0]
+
+
+def unmask(data, mask, shape=None, asdata=None):
+    """
+    Unmask 1D or 2D into an nD based on shape or asdata
+    """
+    if asdata is not None:
+        if shape is not None:
+            print('Both shape and asdata were defined. '
+                  f'Overwriting shape {shape} with asdata {asdata.shape}')
+        shape = asdata.shape
+    elif shape == '':
+        raise ValueError('Both shape and asdata are empty. '
+                         'Must specify at least one')
+
+    if data.shape[0] != mask.sum():
+        raise ValueError('Cannot unmask data with first dimension '
+                         f'{data.shape[0]} using mask with shape '
+                         f'{mask.shape} ({np.prod(mask.shape)} entries)')
+    if shape[:len(mask.shape)] != mask.shape:
+        raise ValueError(f'Cannot unmask data into shape {shape} using mask '
+                         f'with shape {mask.shape}')
+
+    out = np.zeros(shape)
+    out[mask != 0] = data
+    return out
 
 #############
 # Workflows #
@@ -219,3 +304,50 @@ def compute_metric(data, atlas, mask, metric='avg', invert=False):
         orig_metric[atlas == label] = parcels[m, -1]
 
     return rank_map, orig_metric
+
+
+def som(fname, n_comp, outname='', max_iter=1000, tolerance=-1, init_mode='pca'):
+    """
+    init_mode: pca, rand
+    """
+    from sklearn.preprocessing import scale
+
+    data, mask, img = load_nifti_get_mask(check_ext(fname))
+    data_mkd = apply_mask(data, mask)
+
+    if init_mode == 'pca':
+        from sklearn.decomposition import PCA
+        pca = PCA()
+        pca.fit(data_mkd)
+        t = pca.components_[:n_comp]
+    elif init_mode == 'rand':
+        rng = np.random.default_rng(42)
+        t = rng.random((n_comp, data_mkd.shape[-1]))
+    else:
+        raise Exception(f'Init mode {init_mode} not implemented yet. '
+                        'Possible modes are: pca, rand')
+
+    data_std = scale(data_mkd, axis=1)
+    t_std = scale(t, axis=1)
+    tmp_old = np.empty((data_std.shape[0], t_std.shape[0]))
+
+    for i in range(0, max_iter):
+        tmp = np.matmul(data_std, t_std.T)
+        clus = np.argmax(tmp, axis=1)
+
+        for j in range(0, n_comp):
+            t_std[j, :] = data_std[clus == j, :].mean(axis=0)
+        t_std = scale(t_std, axis=1)
+
+        print(f'Round: {i}, Distance: {np.linalg.norm(tmp-tmp_old):.6f}')
+
+        if tolerance >= 0 and np.linalg.norm(tmp-tmp_old) <= tolerance:
+            break
+
+        tmp_old = np.copy(tmp)
+
+    clus_vol = unmask(clus+1, mask, asdata=mask)
+
+    if outname == '':
+        outname = f'som_{init_mode}_{n_comp}'
+    export_nifti(clus_vol, img, outname)
