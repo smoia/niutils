@@ -153,6 +153,46 @@ def unmask(data, mask, shape=None, asdata=None):
     out[mask != 0] = data
     return out
 
+
+def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca'):
+    """
+    init_mode: pca, rand
+    """
+    from sklearn.preprocessing import scale
+
+    if init_mode == 'pca':
+        from sklearn.decomposition import PCA
+        pca = PCA()
+        pca.fit(data_mkd)
+        t = pca.components_[:n_comp]
+    elif init_mode == 'rand':
+        rng = np.random.default_rng(42)
+        t = rng.random((n_comp, data_mkd.shape[-1]))
+    else:
+        raise Exception(f'Init mode {init_mode} not implemented yet. '
+                        'Possible modes are: pca, rand')
+
+    data_std = scale(data_mkd, axis=1)
+    t_std = scale(t, axis=1)
+    tmp_old = np.empty((data_std.shape[0], t_std.shape[0]))
+
+    for i in range(0, max_iter):
+        tmp = np.matmul(data_std, t_std.T)
+        clus = np.argmax(tmp, axis=1)
+
+        for j in range(0, n_comp):
+            t_std[j, :] = data_std[clus == j, :].mean(axis=0)
+        t_std = scale(t_std, axis=1)
+
+        print(f'Round: {i}, Distance: {np.linalg.norm(tmp-tmp_old):.6f}')
+
+        if tolerance >= 0 and np.linalg.norm(tmp-tmp_old) <= tolerance:
+            break
+
+        tmp_old = np.copy(tmp)
+
+    return clus+1
+
 #############
 # Workflows #
 #############
@@ -306,47 +346,16 @@ def compute_metric(data, atlas, mask, metric='avg', invert=False):
     return rank_map, orig_metric
 
 
-def som(fname, n_comp, outname='', max_iter=1000, tolerance=-1, init_mode='pca'):
+def compute_som(fname, n_comp, outname='', max_iter=1000, tolerance=-1, init_mode='pca'):
     """
     init_mode: pca, rand
     """
-    from sklearn.preprocessing import scale
-
     data, mask, img = load_nifti_get_mask(check_ext(fname))
     data_mkd = apply_mask(data, mask)
 
-    if init_mode == 'pca':
-        from sklearn.decomposition import PCA
-        pca = PCA()
-        pca.fit(data_mkd)
-        t = pca.components_[:n_comp]
-    elif init_mode == 'rand':
-        rng = np.random.default_rng(42)
-        t = rng.random((n_comp, data_mkd.shape[-1]))
-    else:
-        raise Exception(f'Init mode {init_mode} not implemented yet. '
-                        'Possible modes are: pca, rand')
+    clus = som(data_mkd, n_comp, max_iter, tolerance, init_mode)
 
-    data_std = scale(data_mkd, axis=1)
-    t_std = scale(t, axis=1)
-    tmp_old = np.empty((data_std.shape[0], t_std.shape[0]))
-
-    for i in range(0, max_iter):
-        tmp = np.matmul(data_std, t_std.T)
-        clus = np.argmax(tmp, axis=1)
-
-        for j in range(0, n_comp):
-            t_std[j, :] = data_std[clus == j, :].mean(axis=0)
-        t_std = scale(t_std, axis=1)
-
-        print(f'Round: {i}, Distance: {np.linalg.norm(tmp-tmp_old):.6f}')
-
-        if tolerance >= 0 and np.linalg.norm(tmp-tmp_old) <= tolerance:
-            break
-
-        tmp_old = np.copy(tmp)
-
-    clus_vol = unmask(clus+1, mask, asdata=mask)
+    clus_vol = unmask(clus, mask, asdata=mask)
 
     if outname == '':
         outname = f'som_{init_mode}_{n_comp}'
