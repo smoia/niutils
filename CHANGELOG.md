@@ -1,3 +1,15 @@
+# 0.3.1 (Wed Oct 20 2021)
+
+#### 🐛 Bug Fix
+
+- Split som into util and workflow [#4](https://github.com/smoia/niutils/pull/4) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.3.0 (Sat Oct 09 2021)
 
 #### 🚀 Enhancement
