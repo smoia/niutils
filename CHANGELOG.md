@@ -1,3 +1,15 @@
+# 0.3.2 (Thu Nov 04 2021)
+
+#### ⚠️ Pushed to `master`
+
+- enh: Allow PCA for SOM to be solved partially ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.3.1 (Wed Oct 20 2021)
 
 #### 🐛 Bug Fix
