@@ -1,3 +1,15 @@
+# 0.3.3 (Sat Nov 06 2021)
+
+#### ⚠️ Pushed to `master`
+
+- Allow SOM to be initialised by a previous run of a PCA ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.3.2 (Thu Nov 04 2021)
 
 #### ⚠️ Pushed to `master`
