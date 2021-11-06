@@ -154,7 +154,8 @@ def unmask(data, mask, shape=None, asdata=None):
     return out
 
 
-def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca', solve_full=True):
+def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca',
+        solve_full=True, return_pca=False, pca=None):
     """
     init_mode: pca, rand
     solve_full: if True solve PCA entirely, if False use arpack method.
@@ -162,12 +163,14 @@ def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca', solve_fu
     from sklearn.preprocessing import scale
 
     if init_mode == 'pca':
-        from sklearn.decomposition import PCA
-        if solve_full:
-            pca = PCA()
-        else:
-            pca = PCA(n_components=n_comp, svd_solver='arpack')
-        pca.fit(data_mkd)
+        if pca is None:
+            from sklearn.decomposition import PCA
+            if solve_full:
+                pca = PCA()
+            else:
+                pca = PCA(n_components=n_comp, svd_solver='arpack')
+            pca.fit(data_mkd)
+
         t = pca.components_[:n_comp]
     elif init_mode == 'rand':
         rng = np.random.default_rng(42)
@@ -195,7 +198,11 @@ def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca', solve_fu
 
         tmp_old = np.copy(tmp)
 
-    return clus+1
+    if return_pca:
+        return clus+1, pca
+    else:
+        return clus+1
+
 
 #############
 # Workflows #
