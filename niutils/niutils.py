@@ -30,6 +30,16 @@ def check_ext(fname, ext='.nii.gz'):
     return f'{fname}{ext}'
 
 
+def check_img_equal(img1, img2):
+    """
+    Check that two images are the same
+    """
+    try:
+        np.all(img1.header['dim'] == img2.header['dim'])
+    except:
+        raise Exception('Images needs to have the same dimensions!')
+
+
 def load_nifti_get_mask(fname, dim=4):
     """
     Load a nifti file and returns its data, its image, and a 3d mask.
