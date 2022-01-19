@@ -369,9 +369,22 @@ def compute_metric(data, atlas, mask, metric='avg', invert=False):
 
 def compute_som(fname, n_comp, outname='', max_iter=1000, tolerance=-1, init_mode='pca'):
     """
+    fname: str, path, or list
     init_mode: pca, rand
     """
+    if type(fname) is str:
+        fname = [fname]
+
+    img = dict.fromkeys(fname)
     data, mask, img = load_nifti_get_mask(check_ext(fname))
+
+    for f in fname:
+        d, m, i = load_nifti_get_mask(check_ext(f))
+        check_img_equal(img, i)
+        data = np.concatenate((data, d), axis=-1)
+        mask = np.concatenate((mask, m), axis=-1)
+
+    mask = np.any(mask, axis=-1)
     data_mkd = apply_mask(data, mask)
 
     clus = som(data_mkd, n_comp, max_iter, tolerance, init_mode)
