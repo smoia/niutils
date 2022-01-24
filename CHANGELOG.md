@@ -1,3 +1,18 @@
+# 0.3.4 (Mon Jan 24 2022)
+
+#### ⚠️ Pushed to `master`
+
+- Merge remote-tracking branch 'origin/master' ([@smoia](https://github.com/smoia))
+- Fix import ([@smoia](https://github.com/smoia))
+- Concatenate SOM inputs internally rather than externally ([@smoia](https://github.com/smoia))
+- Add function to check that two images have same dimensions ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.3.3 (Sat Nov 06 2021)
 
 #### ⚠️ Pushed to `master`
