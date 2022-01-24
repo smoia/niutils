@@ -369,16 +369,20 @@ def compute_metric(data, atlas, mask, metric='avg', invert=False):
 
 def compute_som(fname, n_comp, outname='', max_iter=1000, tolerance=-1, init_mode='pca'):
     """
+    Workflow to compute temporal SOM on a (series of) nifti files.
+    
     fname: str, path, or list
+        If list, concatenate inputs in time.
+
     init_mode: pca, rand
     """
     if type(fname) is str:
         fname = [fname]
 
     img = dict.fromkeys(fname)
-    data, mask, img = load_nifti_get_mask(check_ext(fname))
+    data, mask, img = load_nifti_get_mask(check_ext(fname[0]))
 
-    for f in fname:
+    for f in fname[1:]:
         d, m, i = load_nifti_get_mask(check_ext(f))
         check_img_equal(img, i)
         data = np.concatenate((data, d), axis=-1)
@@ -393,4 +397,5 @@ def compute_som(fname, n_comp, outname='', max_iter=1000, tolerance=-1, init_mod
 
     if outname == '':
         outname = f'som_{init_mode}_{n_comp}'
+
     export_nifti(clus_vol, img, outname)
