@@ -176,7 +176,7 @@ def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca',
         if pca is None:
             from sklearn.decomposition import PCA
             if solve_full:
-                pca = PCA()
+                pca = PCA(svd_solver='full')
             else:
                 pca = PCA(n_components=n_comp, svd_solver='arpack')
             pca.fit(data_mkd)
