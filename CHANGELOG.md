@@ -1,3 +1,15 @@
+# 0.3.5 (Wed Jul 13 2022)
+
+#### ⚠️ Pushed to `master`
+
+- Force full solve to be truly full (s.moia@bcbl.eu)
+
+#### Authors: 1
+
+- Stefano Moia (s.moia@bcbl.eu)
+
+---
+
 # 0.3.4 (Mon Jan 24 2022)
 
 #### ⚠️ Pushed to `master`
