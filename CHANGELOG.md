@@ -1,3 +1,15 @@
+# 0.3.6 (Mon Aug 01 2022)
+
+#### ⚠️ Pushed to `master`
+
+- feat: Add pairwise and relabel (s.moia@bcbl.eu)
+
+#### Authors: 1
+
+- Stefano Moia (s.moia@bcbl.eu)
+
+---
+
 # 0.3.5 (Wed Jul 13 2022)
 
 #### ⚠️ Pushed to `master`
