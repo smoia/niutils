@@ -1,6 +1,7 @@
 {
   "plugins": [
     "git-tag",
+    "conventional-commits",
     "released"
   ],
   "owner": "smoia",
