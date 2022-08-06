@@ -1,3 +1,19 @@
+# 0.4.1 (Sat Aug 06 2022)
+
+#### 🐛 Bug Fix
+
+- fix: Move relabel around (s.moia@bcbl.eu)
+
+#### ⚠️ Pushed to `master`
+
+- Merge branch 'master' of github.com:smoia/niutils (s.moia@bcbl.eu)
+
+#### Authors: 1
+
+- Stefano Moia (s.moia@bcbl.eu)
+
+---
+
 # 0.4.0 (Mon Aug 01 2022)
 
 #### 🚀 Enhancement
