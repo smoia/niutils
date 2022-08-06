@@ -1,3 +1,15 @@
+# 0.4.0 (Mon Aug 01 2022)
+
+#### 🚀 Enhancement
+
+- feat: Add conventional commits to autorc (s.moia@bcbl.eu)
+
+#### Authors: 1
+
+- Stefano Moia (s.moia@bcbl.eu)
+
+---
+
 # 0.3.6 (Mon Aug 01 2022)
 
 #### ⚠️ Pushed to `master`
