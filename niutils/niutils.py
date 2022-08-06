@@ -4,6 +4,7 @@ import os
 from copy import deepcopy
 from itertools import tee
 
+import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -245,6 +246,61 @@ def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca',
         return clus+1
 
 
+def relabel(prefix, kclus=KCLUSLIST, offset=9000):
+    # Prepare data
+    # kclus = [f"{i:02d}" for i in list(kclus)]
+
+    data = {}
+    data2d = {}
+    hungdist = np.zeros(len(kclus)-1)
+
+    # Read in data
+    key = f'{prefix}_clus-{kclus[0]}'
+    data[kclus[0]], mask, img = load_nifti_get_mask(key)
+    for k in kclus[1:]:
+        key = f'{prefix}_clus-{k}'
+        data[k], _, _ = load_nifti_get_mask(key)
+
+    # Apply mask
+    for k in kclus:
+        data2d[k] = apply_mask(data[k], mask)
+
+    # Relabel
+    for k, idx in enumerate(pairwise(kclus)):
+        i, j = idx
+        # Compute contingency matrix
+        labels = np.unique(data2d[j]).astype(int)
+        c = confusion_matrix(data2d[i], data2d[j], labels=labels)
+        # Hungarian algorithm
+        hi, hj = linear_sum_assignment(c * -1)
+        # Compute distance
+        hungdist[k] = c[hi, hj].sum() / mask.sum()
+        # Match labels
+        hi += 1
+        hj += (1 + offset)
+        data2d[j] += offset
+        # Actual relabelling
+        for n, m in zip(hi, hj):
+            print(f'{m-offset:4} {n:4}')
+            data2d[j][data2d[j] == m] = n
+
+    # Export
+    os.makedirs('relabelled', exist_ok=True)
+    for k in kclus:
+        key = f'relabelled/{prefix}_clus-{k}'
+        dataout = unmask(data2d[k], mask, asdata=mask)
+        export_nifti(dataout, img, key)
+    np.savetxt(f'relabelled/{prefix}_dist', hungdist)
+
+    plt.plot(kclus[:-1], hungdist)
+    plt.title(f'Hungarian Distance {prefix}')
+    plt.ylabel('Hungarian Distance')
+    plt.xlabel('K')
+    plt.tight_layout()
+    plt.savefig(f'relabelled/{prefix}_dist.png', dpi=100)
+    plt.close()
+
+
 #############
 # Workflows #
 #############
@@ -430,51 +486,3 @@ def compute_som(fname, n_comp, outname='', max_iter=1000, tolerance=-1, init_mod
         outname = f'som_{init_mode}_{n_comp}'
 
     export_nifti(clus_vol, img, outname)
-
-
-def relabel(prefix, kclus=KCLUSLIST, offset=9000):
-    # Prepare data
-    # kclus = [f"{i:02d}" for i in list(kclus)]
-
-    data = {}
-    data2d = {}
-    hungdist = np.zeros(len(kclus)-1)
-
-    # Read in data
-    key = f'{prefix}_clus-{kclus[0]}'
-    data[kclus[0]], mask, img = load_nifti_get_mask(key)
-    for k in kclus[1:]:
-        key = f'{prefix}_clus-{k}'
-        data[k], _, _ = load_nifti_get_mask(key)
-
-    # Apply mask
-    for k in kclus:
-        data2d[k] = apply_mask(data[k], mask)
-
-    # Relabel
-    for k, idx in enumerate(pairwise(kclus)):
-        i, j = idx
-        # Compute contingency matrix
-        labels = np.unique(data2d[j]).astype(int)
-        c = confusion_matrix(data2d[i], data2d[j], labels=labels)
-        # Hungarian algorithm
-        hi, hj = linear_sum_assignment(c * -1)
-        # Compute distance
-        hungdist[k] = c[hi, hj].sum()
-        # Match labels
-        hi += 1
-        hj += (1 + offset)
-        data2d[j] += offset
-        # Actual relabelling
-        for n, m in zip(hi, hj):
-            print(f'{m-offset:4} {n:4}')
-            data2d[j][data2d[j] == m] = n
-
-    # Export
-    os.makedirs('relabelled', exist_ok=True)
-    for k in kclus:
-        key = f'relabelled/{prefix}_clus-{k}'
-        dataout = unmask(data2d[k], mask, asdata=mask)
-        export_nifti(dataout, img, key)
-    np.savetxt(f'relabelled/{prefix}_dist', hungdist)
-    np.savetxt(f'relabelled/{prefix}_dist_zscored', zscore(hungdist))
