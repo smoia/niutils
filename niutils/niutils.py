@@ -301,6 +301,22 @@ def relabel(prefix, kclus=KCLUSLIST, offset=9000):
     plt.close()
 
 
+def plotts(tss, colorbar=False):
+    if type(tss) not in [list, tuple]:
+        tss = [tss]
+
+    fig = plt.figure()
+    ax = fig.subplots(nrows=len(tss), ncols=1)
+
+    for i, ts in enumerate(tss):
+        pcm = ax[i].imshow(ts, cmap="gray")
+        fig.colorbar(pcm, ax=ax[i]) if colorbar else None
+
+    fig.tight_layout()
+    plt.show()
+    return
+
+
 #############
 # Workflows #
 #############
