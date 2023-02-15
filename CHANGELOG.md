@@ -1,3 +1,15 @@
+# 0.5.0 (Wed Feb 15 2023)
+
+#### 🚀 Enhancement
+
+- feat: add a quick timeseries plot function ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.4.1 (Sat Aug 06 2022)
 
 #### 🐛 Bug Fix
