@@ -1,3 +1,15 @@
+# 0.6.0 (Mon Mar 20 2023)
+
+#### 🚀 Enhancement
+
+- feat: Force PCA to have same random state initialisation ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.5.0 (Wed Feb 15 2023)
 
 #### 🚀 Enhancement
