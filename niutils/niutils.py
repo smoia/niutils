@@ -208,9 +208,9 @@ def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca',
         if pca is None:
             from sklearn.decomposition import PCA
             if solve_full:
-                pca = PCA(svd_solver='full')
+                pca = PCA(svd_solver='full', random_state=42)
             else:
-                pca = PCA(n_components=n_comp, svd_solver='arpack')
+                pca = PCA(n_components=n_comp, svd_solver='arpack', random_state=42)
             pca.fit(data_mkd)
 
         t = pca.components_[:n_comp]
