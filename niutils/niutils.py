@@ -179,7 +179,7 @@ def unmask(data, mask, shape=None, asdata=None):
             print('Both shape and asdata were defined. '
                   f'Overwriting shape {shape} with asdata {asdata.shape}')
         shape = asdata.shape
-    elif shape == '':
+    elif shape == '' or shape is None:
         raise ValueError('Both shape and asdata are empty. '
                          'Must specify at least one')
 
