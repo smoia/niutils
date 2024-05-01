@@ -7,9 +7,6 @@ from itertools import tee
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
-from scipy.optimize import linear_sum_assignment
-from scipy.stats import zscore
-from sklearn.metrics import confusion_matrix
 
 
 SUB_LIST = ['001', '002', '003', '004', '007', '008', '009']
@@ -247,6 +244,9 @@ def som(data_mkd, n_comp, max_iter=1000, tolerance=-1, init_mode='pca',
 
 
 def relabel(prefix, kclus=KCLUSLIST, offset=9000):
+    from scipy.optimize import linear_sum_assignment
+    from sklearn.metrics import confusion_matrix
+
     # Prepare data
     # kclus = [f"{i:02d}" for i in list(kclus)]
 
