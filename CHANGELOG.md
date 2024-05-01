@@ -1,3 +1,23 @@
+# 0.7.0 (Wed May 01 2024)
+
+#### 🚀 Enhancement
+
+- feat: certain imports should be optional (and installs should be extras ([@smoia](https://github.com/smoia))
+
+#### 🐛 Bug Fix
+
+- fix: Better declare reshape values ([@smoia](https://github.com/smoia))
+
+#### ⚠️ Pushed to `master`
+
+- int: Update CI environment ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.6.0 (Mon Mar 20 2023)
 
 #### 🚀 Enhancement
