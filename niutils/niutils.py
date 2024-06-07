@@ -69,11 +69,11 @@ def check_img_equal(img1, img2):
         raise Exception('Images needs to have the same dimensions!')
 
 
-def load_nifti_get_mask(fname, dim=4):
+def load_nifti_get_mask(fname, dim=4, ext='.nii.gz'):
     """
     Load a nifti file and returns its data, its image, and a 3d mask.
     """
-    img = nib.load(check_ext(fname))
+    img = nib.load(check_ext(fname, ext))
     data = img.get_fdata()
     if len(data.shape) > dim:
         for ax in range(dim, len(data.shape)):
