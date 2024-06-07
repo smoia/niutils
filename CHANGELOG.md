@@ -1,3 +1,15 @@
+# 0.8.0 (Fri Jun 07 2024)
+
+#### 🚀 Enhancement
+
+- feat: add flexibility in loading other datatype ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.7.0 (Wed May 01 2024)
 
 #### 🚀 Enhancement
