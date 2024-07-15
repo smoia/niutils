@@ -1,3 +1,15 @@
+# 0.9.0 (Mon Jul 15 2024)
+
+#### 🚀 Enhancement
+
+- feat: add tSNR ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.8.0 (Fri Jun 07 2024)
 
 #### 🚀 Enhancement
