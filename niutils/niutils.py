@@ -317,9 +317,24 @@ def plotts(tss, colorbar=False):
     return
 
 
+def tsnr(fmri):
+    return np.nan_to_num(fmri.mean(axis=-1) / fmri.std(axis=-1))
+
+
 #############
 # Workflows #
 #############
+
+
+def compute_tsnr(fname, mname=None, oname=None):
+    fmri, mask, img = load_nifti_get_mask(fname)
+    if mname is not None:
+        mask, _, img = load_nifti_get_mask(mname, dim=3)
+    snr = unmask(tsnr(apply_mask(fmri, mask)), mask, asdata=mask)
+    if oname is None:
+        oname = f'{fname[:-7]}_tsnr.nii.gz'
+    export_nifti(snr, img, oname, overwrite=True)
+    return
 
 
 def variance_weighted_average(fname,
